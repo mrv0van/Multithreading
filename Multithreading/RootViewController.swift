@@ -14,6 +14,7 @@ final class RootViewController: UIViewController {
 	fileprivate enum Constants: CGFloat {
 		case spacing = 30
 		case rowHeight = 60
+		case graphHeight = 120
 	}
 
 	fileprivate typealias Action = () -> Void
@@ -47,16 +48,18 @@ final class RootViewController: UIViewController {
 			return
 		}
 		
-		let switcher       = createAsyncSwitcher()
-		let pThreadButton  = createListAction(title: "PThread", parallelizator: PThreadParallelizator())
-		let nsThreadButton = createListAction(title: "NSThread", parallelizator: NSThreadParallelizator())
-		let space          = createFlexibleSpace()
+		let switcher          = createAsyncSwitcher()
+		let pThreadButton     = createListAction(title: "PThread", parallelizator: PThreadParallelizator())
+		let nsThreadButton    = createListAction(title: "NSThread", parallelizator: NSThreadParallelizator())
+		let animatedGraphView = createAnimatedGraphView()
+		let space             = createFlexibleSpace()
 
 		let stackView = createStackView(arrangedSubviews: [
 			switcher,
 			pThreadButton,
 			nsThreadButton,
-			space
+			space,
+			animatedGraphView
 		])
 		view.addSubview(stackView)
 		
@@ -64,7 +67,7 @@ final class RootViewController: UIViewController {
 			stackView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: Constants.spacing.rawValue),
 			stackView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -Constants.spacing.rawValue),
 			stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Constants.spacing.rawValue),
-			stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+			stackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constants.spacing.rawValue)
 		])
 	}
 
@@ -141,7 +144,16 @@ final class RootViewController: UIViewController {
 		return space
 	}
 	
+	fileprivate func createAnimatedGraphView() -> AnimatedGraphView {
+		let view = AnimatedGraphView()
+		view.translatesAutoresizingMaskIntoConstraints = false
+		NSLayoutConstraint.activate([
+			view.heightAnchor.constraint(equalToConstant: Constants.graphHeight.rawValue)
+		])
+		return view
+	}
 	
+
 	// MARK: - Action handling
 	
 	@objc fileprivate func buttonActionHandler(sender: UIButton!) {
@@ -189,7 +201,7 @@ final class RootViewController: UIViewController {
 		let beginTime = CACurrentMediaTime()
 		
 		var work: Float = 0
-		for i in 0...10_000_000 {
+		for i in 0...1_000_000 {
 			work += Float(arc4random_uniform(UInt32(i)))
 		}
 		
