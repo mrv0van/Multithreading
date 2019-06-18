@@ -9,8 +9,7 @@
 import UIKit
 
 
-final class RootViewController: UIViewController {
-	
+final class RootViewController: UIViewController, ParameterViewDelegate {
 	fileprivate enum Constants: CGFloat {
 		case spacing = 30
 		case rowHeight = 60
@@ -23,7 +22,10 @@ final class RootViewController: UIViewController {
 		let parallelizator: Parallelizator!
 	}
 	fileprivate var actionsList: [ListAction]
-	fileprivate var shouldDetachThread: Bool
+	
+	fileprivate var controlFlow: ControlFlow!
+	fileprivate var detachState: DetachState!
+	fileprivate var qualityOfService: QualityOfService!
 	
 
 	// MARK: - Life cycle
@@ -34,7 +36,9 @@ final class RootViewController: UIViewController {
 	
 	override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
 		actionsList = []
-		shouldDetachThread = false
+		controlFlow = .sync
+		detachState = .detached
+		qualityOfService = .default
 		super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
 		navigationItem.title = "Ways of parallelism"
 	}
@@ -48,16 +52,18 @@ final class RootViewController: UIViewController {
 			return
 		}
 		
-		let switcher          = createAsyncSwitcher()
-		let pThreadButton     = createListAction(title: "PThread", parallelizator: PThreadParallelizator())
-		let nsThreadButton    = createListAction(title: "NSThread", parallelizator: NSThreadParallelizator())
+		let parametersView    = createParametersView()
+		let pThreadButton     = createListAction(parallelizator: PThreadParallelizator())
+		let nsThreadButton    = createListAction(parallelizator: NSThreadParallelizator())
+		let gcdButton         = createListAction(parallelizator: GCDParallelizator())
 		let animatedGraphView = createAnimatedGraphView()
 		let space             = createFlexibleSpace()
 
 		let stackView = createStackView(arrangedSubviews: [
-			switcher,
+			parametersView,
 			pThreadButton,
 			nsThreadButton,
+			gcdButton,
 			space,
 			animatedGraphView
 		])
@@ -90,38 +96,20 @@ final class RootViewController: UIViewController {
 		return stackView
 	}
 	
-	fileprivate func createAsyncSwitcher() -> UIView {
-		let view = UIView()
-		view.backgroundColor = .lightGray
-		
-		let label = UILabel()
-		label.text = "Should detach thread";
-		label.numberOfLines = 2
-		label.font = .systemFont(ofSize: 18)
-		label.textColor = .white
-		view.addSubview(label)
-		
-		let switcher = UISwitch()
-		switcher.isOn = shouldDetachThread
-		switcher.addTarget(self, action: #selector(asyncSwitcherHandler), for: .valueChanged)
-		view.addSubview(switcher)
-		
+	fileprivate func createParametersView() -> ParametersView {
+		let initialValues: [ParameterDetails] = [controlFlow, detachState, qualityOfService]
+		let view = ParametersView(initialValues: initialValues)
+		view.delegate = self
 		view.translatesAutoresizingMaskIntoConstraints = false
-		label.translatesAutoresizingMaskIntoConstraints = false
-		switcher.translatesAutoresizingMaskIntoConstraints = false
 		NSLayoutConstraint.activate([
 			view.heightAnchor.constraint(equalToConstant: Constants.rowHeight.rawValue),
-			label.leftAnchor.constraint(equalTo: view.leftAnchor, constant: Constants.spacing.rawValue),
-			label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-			switcher.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -Constants.spacing.rawValue),
-			switcher.centerYAnchor.constraint(equalTo: view.centerYAnchor)
 		])
 		return view
 	}
 	
-	fileprivate func createListAction(title: String!, parallelizator: Parallelizator!) -> UIView {
+	fileprivate func createListAction(parallelizator: Parallelizator!) -> UIView {
 		let button = UIButton()
-		button.setTitle(title, for: .normal)
+		button.setTitle(parallelizator.name, for: .normal)
 		button.backgroundColor = .gray
 		button.addTarget(self, action: #selector(buttonActionHandler), for: .touchUpInside)
 		button.translatesAutoresizingMaskIntoConstraints = false
@@ -146,6 +134,8 @@ final class RootViewController: UIViewController {
 	
 	fileprivate func createAnimatedGraphView() -> AnimatedGraphView {
 		let view = AnimatedGraphView()
+		view.backgroundColor = .lightGray
+		view.graphColor = .black
 		view.translatesAutoresizingMaskIntoConstraints = false
 		NSLayoutConstraint.activate([
 			view.heightAnchor.constraint(equalToConstant: Constants.graphHeight.rawValue)
@@ -162,13 +152,22 @@ final class RootViewController: UIViewController {
 				continue
 			}
 			do {
-				if (shouldDetachThread)
-				{
-					try performAsyncTask(parallelizator: action.parallelizator)
+				guard let parallelizator = action.parallelizator else {
+					return
 				}
-				else
-				{
-					try performSyncTask(parallelizator: action.parallelizator)
+				
+				let name = parallelizator.name
+				let parameters: [ParameterDetails] = [controlFlow, detachState, qualityOfService]
+				let actionBlock: () -> Void = { [weak self] in
+					self?.performTask(name: name!, parameters: parameters)
+				}
+
+				parallelizator.qosClass = qualityOfService.qosClass
+				parallelizator.detached = detachState == .detached
+				if controlFlow == .sync {
+					try parallelizator.performSync(action: actionBlock)
+				} else {
+					try parallelizator.performAsync(action: actionBlock)
 				}
 			}
 			catch {
@@ -178,25 +177,10 @@ final class RootViewController: UIViewController {
 		}
 	}
 	
-	@objc fileprivate func asyncSwitcherHandler(sender: UISwitch!) {
-		shouldDetachThread = sender.isOn
-	}
-	
-	fileprivate func performSyncTask(parallelizator: Parallelizator!) throws {
-		try parallelizator.performSync { [weak self] in
-			self?.performTask(name: parallelizator.name, mode: "sync")
-		}
-	}
-
-	fileprivate func performAsyncTask(parallelizator: Parallelizator!) throws {
-		try parallelizator.performAsync { [weak self] in
-			self?.performTask(name: parallelizator.name, mode: "async")
-		}
-	}
-	
-	fileprivate func performTask(name: String!, mode: String!) {
+	fileprivate func performTask(name: String, parameters: [ParameterDetails]) {
 		let uid = UUID().uuidString.suffix(5).lowercased()
-		print("Thread work[\(uid)] started: \(name!), \(mode!)")
+		let parametersValueNames = parameters.map { $0.valueName! }
+		print("🚀 \(name)[\(uid)] \(parametersValueNames)")
 
 		let beginTime = CACurrentMediaTime()
 		
@@ -207,7 +191,19 @@ final class RootViewController: UIViewController {
 		
 		let duration = CACurrentMediaTime() - beginTime
 		
-		print("Thread work[\(uid)] done in \(duration) s.")
+		print("🏁 \(name)[\(uid)] in \(duration) s.")
+	}
+	
+	
+	// MARK: - Protocol conformance <ParametersViewDelegate>
+	
+	func parametersView(_: ParametersView!, didChangeParameter parameter: ParameterDetails!) {
+		switch parameter {
+		case let controlFlow as ControlFlow: self.controlFlow = controlFlow
+		case let detachState as DetachState: self.detachState = detachState
+		case let qualityOfService as QualityOfService: self.qualityOfService = qualityOfService
+		default: return
+		}
 	}
 }
 

@@ -9,23 +9,15 @@
 import Foundation
 
 
-protocol Parallelizator: AnyObject {
-	
+protocol Parallelizator: AnyObject {	
 	typealias Action = () -> Void
 	
 	var name: String! { get }
 	
 	var qosClass: qos_class_t! { get set }
+	var detached: Bool! { get set }
 	
-	func performSync(action: Action!) throws
+	func performSync(action: @escaping Action) throws
 	
-	func performAsync(action: Action!) throws
-}
-
-
-extension QualityOfService {
-	
-	init?(qosClass: qos_class_t) {
-		self.init(rawValue: Int(qosClass.rawValue))
-	}
+	func performAsync(action: @escaping Action) throws
 }

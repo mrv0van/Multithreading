@@ -17,37 +17,39 @@ enum PThreadParallelizatorError: Error {
 }
 
 
-final class PThreadParallelizator : Parallelizator {
+final class PThreadParallelizator: Parallelizator {
 	
-	// MARK: Life cycle
+	// MARK: - Life cycle
 	
 	init() {
-		qosClass = QOS_CLASS_BACKGROUND
+		qosClass = DefaultQosClass
+		detached = false
 	}
 	
 	
-	// MARK: Protocol conformance <Parallelizator>
+	// MARK: - Protocol conformance <Parallelizator>
 
 	var name: String! {
 		return "pthread"
 	}
 	
 	var qosClass: qos_class_t!
+	var detached: Bool!
 
-	func performSync(action: Parallelizator.Action!) throws {
+	func performSync(action: @escaping Parallelizator.Action) throws {
 		let pThread = try createPThread(action: action)
 		pthread_join(pThread, nil)
 	}
 	
-	func performAsync(action: Parallelizator.Action!) throws {
+	func performAsync(action: @escaping Parallelizator.Action) throws {
 		let pThread = try createPThread(action: action)
 		pthread_detach(pThread)
 	}
 	
 	
-	// MARK: Routine
+	// MARK: - Routine
 	
-	private func createPThread(action: Parallelizator.Action!) throws -> pthread_t {
+	fileprivate func createPThread(action: @escaping Parallelizator.Action) throws -> pthread_t {
 		var attributesPtr = UnsafeMutablePointer<pthread_attr_t>.allocate(capacity: 1)
 		let attributesInitResult = pthread_attr_init(attributesPtr)
 		guard 0 == attributesInitResult else {
@@ -58,7 +60,8 @@ final class PThreadParallelizator : Parallelizator {
 			pthread_attr_destroy(attributesPtr)
 		}
 		
-		let setDetachStateResult = pthread_attr_setdetachstate(attributesPtr, PTHREAD_CREATE_JOINABLE)
+		let detachedState = detached ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE
+		let setDetachStateResult = pthread_attr_setdetachstate(attributesPtr, detachedState)
 		guard 0 == setDetachStateResult else {
 			throw PThreadParallelizatorError.detachState
 		}

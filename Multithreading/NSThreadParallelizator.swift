@@ -9,30 +9,27 @@
 import Foundation
 
 
-enum NSThreadParallelizatorError: Error {
-	case qualityOfService
-}
+final class NSThreadParallelizator: Parallelizator {
 
-
-
-final class NSThreadParallelizator : Parallelizator {
-
-	// MARK: Life cycle
+	// MARK: - Life cycle
 	
 	init() {
-		qosClass = QOS_CLASS_BACKGROUND
+		qosClass = DefaultQosClass
+		detached = false
 	}
 	
 	
-	// MARK: Protocol conformance <Parallelizator>
+	// MARK: - Protocol conformance <Parallelizator>
+	
 	var name: String! {
 		return "NSThread"
 	}
 	
 	var qosClass: qos_class_t!
+	var detached: Bool!
 
-	func performSync(action: Parallelizator.Action!) throws {
-		let thread = try createNSThread(action: action)
+	func performSync(action: @escaping Parallelizator.Action) throws {
+		let thread = createNSThread(action: action)
 		thread.start()
 		
 		while !thread.isFinished {
@@ -40,20 +37,17 @@ final class NSThreadParallelizator : Parallelizator {
 		}
 	}
 	
-	func performAsync(action: Parallelizator.Action!) throws {
-		let thread = try createNSThread(action: action)
+	func performAsync(action: @escaping Parallelizator.Action) throws {
+		let thread = createNSThread(action: action)
 		thread.start()
 	}
 	
 	
-	// MARK: Routine
+	// MARK: - Routine
 	
-	func createNSThread(action: Parallelizator.Action!) throws -> Thread {
+	fileprivate func createNSThread(action: @escaping Parallelizator.Action) -> Thread {
 		let thread = Thread(block: action)
-		guard let qualityOfService = QualityOfService(qosClass: qosClass) else {
-			throw NSThreadParallelizatorError.qualityOfService
-		}
-		thread.qualityOfService = qualityOfService
+		thread.qualityOfService = qosClass.qualityOfService
 		return thread
 	}
 }

@@ -10,8 +10,7 @@ import Foundation
 import UIKit
 
 
-final class AnimatedGraphView: UIView {
-	
+final class AnimatedGraphView: UIView {	
 	fileprivate enum Constants: CGFloat {
 		case maxVelociy = 2
 		case pointSize = 10
@@ -32,6 +31,16 @@ final class AnimatedGraphView: UIView {
 	fileprivate var shapePointsList: [ShapePoint]!
 	fileprivate var displayLink: CADisplayLink?
 	
+	static let defaultGraphColor: UIColor = .black
+	var graphColor: UIColor! {
+		didSet {
+			shapeLayer.strokeColor = graphColor.cgColor
+			pointLayersList.forEach { layer in
+				layer.backgroundColor = graphColor.cgColor
+			}
+		}
+	}
+	
 	
 	// MARK: - Life cycle
 	
@@ -39,6 +48,7 @@ final class AnimatedGraphView: UIView {
 		shapeLayer      = AnimatedGraphView.createShapeLayer(frame: frame)
 		pointLayersList = AnimatedGraphView.createPointLayersList(count: numberOfPoints)
         shapePointsList = AnimatedGraphView.createShapePointsList(count: numberOfPoints)
+		graphColor      = AnimatedGraphView.defaultGraphColor
 		
 		super.init(frame: frame)
 		
@@ -74,7 +84,7 @@ final class AnimatedGraphView: UIView {
 		let layer = CAShapeLayer()
 		layer.frame = CGRect(origin: .zero, size: frame.size)
 		layer.fillColor = nil
-		layer.strokeColor = UIColor.black.cgColor
+		layer.strokeColor = AnimatedGraphView.defaultGraphColor.cgColor
 		layer.lineWidth = 1
 		return layer
 	}
@@ -85,7 +95,7 @@ final class AnimatedGraphView: UIView {
 		for _ in 0...count - 1 {
 			let layer = CALayer()
 			layer.frame = CGRect(origin: .zero, size: layerSize)
-			layer.backgroundColor = UIColor.black.cgColor
+			layer.backgroundColor = AnimatedGraphView.defaultGraphColor.cgColor
 			layer.cornerRadius = Constants.pointSize.rawValue / 2.0
 			layersList.append(layer)
 		}
