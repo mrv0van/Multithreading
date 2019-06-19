@@ -45,7 +45,7 @@ final class NSThreadParallelizator: Parallelizator {
 	
 	// MARK: - Routine
 	
-	fileprivate func createNSThread(action: @escaping Parallelizator.Action) -> Thread {
+	private func createNSThread(action: @escaping Parallelizator.Action) -> Thread {
 		let thread = Thread(block: action)
 		thread.qualityOfService = qosClass.qualityOfService
 		return thread

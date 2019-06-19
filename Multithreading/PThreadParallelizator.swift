@@ -49,7 +49,7 @@ final class PThreadParallelizator: Parallelizator {
 	
 	// MARK: - Routine
 	
-	fileprivate func createPThread(action: @escaping Parallelizator.Action) throws -> pthread_t {
+	private func createPThread(action: @escaping Parallelizator.Action) throws -> pthread_t {
 		var attributesPtr = UnsafeMutablePointer<pthread_attr_t>.allocate(capacity: 1)
 		let attributesInitResult = pthread_attr_init(attributesPtr)
 		guard 0 == attributesInitResult else {
@@ -86,7 +86,7 @@ final class PThreadParallelizator: Parallelizator {
 }
 
 
-fileprivate func pThreadBody(pointer: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? {
+private func pThreadBody(pointer: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? {
 	let contextPtr = pointer.bindMemory(to: Parallelizator.Action.self, capacity: 1)
 	defer {
 		contextPtr.deinitialize(count: 1)

@@ -9,100 +9,17 @@
 import UIKit
 
 
-protocol ParameterDetails {
-	static var parameterName: String! { get }
-	static var tag: Int! { get }
-	var valueName: String! { get }
-	var next: ParameterDetails! { get }
-}
-
-enum ControlFlow: ParameterDetails, CaseIterable {
-	case sync
-	case async
-	static var parameterName: String! {
-		return "Control flow"
-	}
-	static var tag: Int! {
-		return 1
-	}
-	var valueName: String! {
-		switch self {
-		case .sync:  return "Sync"
-		case .async: return "Async"
-		}
-	}
-	var next: ParameterDetails! {
-		switch self {
-		case .sync:  return ControlFlow.async
-		case .async: return ControlFlow.sync
-		}
-	}
-}
-
-enum DetachState: ParameterDetails, CaseIterable {
-	case detached
-	case joined
-	static var parameterName: String! {
-		return "Detach state"
-	}
-	static var tag: Int! {
-		return 2
-	}
-	var valueName: String! {
-		switch self {
-		case .detached: return "Detached"
-		case .joined:   return "Joined"
-		}
-	}
-	var next: ParameterDetails! {
-		switch self {
-		case .detached: return DetachState.joined
-		case .joined:   return DetachState.detached
-		}
-	}
-}
-
-extension QualityOfService: ParameterDetails, CaseIterable {
-	public typealias AllCases = [QualityOfService]
-	public static var allCases: [QualityOfService] {
-		return [QualityOfService.userInteractive, .userInitiated, .utility, .background, .default]
-	}
-
-	static var parameterName: String! {
-		return "Quality of service"
-	}
-	static var tag: Int! {
-		return 3
-	}
-	var valueName: String! {
-		switch self {
-		case .userInteractive: return "User interactive"
-		case .userInitiated:   return "User initiated"
-		case .utility:         return "Utility"
-		case .background:      return "Background"
-		default:               return "Default"
-		}
-	}
-	var next: ParameterDetails! {
-		let all = QualityOfService.allCases
-		let idx = all.firstIndex(of: self)!
-		let next = all.index(after: idx)
-		return all[next == all.endIndex ? all.startIndex : next]
-	}
-}
-
-
 protocol ParameterViewDelegate {
 	func parametersView(_: ParametersView!, didChangeParameter: ParameterDetails!)
 }
 
 
 final class ParametersView: UIView {
-	fileprivate enum Constants: CGFloat {
+	private enum Constants: CGFloat {
 		case spacing = 15
 	}
 	
-	fileprivate var parameters: [Int: ParameterDetails]
+	private var parameters: [Int: ParameterDetails]
 	
 	var delegate: ParameterViewDelegate?
 
@@ -110,9 +27,10 @@ final class ParametersView: UIView {
 	// MARK: - Life cycle
 	
 	init(initialValues: [ParameterDetails]) {
-		parameters = [ControlFlow.tag:      ControlFlow.sync,
-					  DetachState.tag:      DetachState.detached,
-					  QualityOfService.tag: QualityOfService.default]
+		parameters = [Int: ParameterDetails]()
+		for parameter in initialValues {
+			parameters[type(of:parameter).tag] = parameter
+		}
 
 		super.init(frame: .zero)
 		
@@ -126,7 +44,7 @@ final class ParametersView: UIView {
 	
 	// MARK: - UI Creating
 	
-	fileprivate func createStackView(arrangedSubviews: [UIView]) {
+	private func createStackView(arrangedSubviews: [UIView]) {
 		let stackView = UIStackView(arrangedSubviews: arrangedSubviews)
 		stackView.axis = .horizontal
 		stackView.distribution = .fillEqually
@@ -147,7 +65,7 @@ final class ParametersView: UIView {
 		NSLayoutConstraint.activate(constraints)
 	}
 
-	fileprivate func createButtons() -> [UIButton] {
+	private func createButtons() -> [UIButton] {
 		var buttonsList = [UIButton]()
 		for tag in parameters.keys.sorted() {
 			let parameter = parameters[tag]!
@@ -166,7 +84,7 @@ final class ParametersView: UIView {
 
 	// MARK: - Parameters
 	
-	@objc fileprivate func buttonDidTap(sender: UIButton) {
+	@objc private func buttonDidTap(sender: UIButton) {
 		guard let parameter = parameters[sender.tag] else {
 			return
 		}

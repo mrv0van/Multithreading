@@ -10,6 +10,7 @@
 		659132E022B8DE7300248CA3 /* QualityOfService+Multithreading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659132DF22B8DE7300248CA3 /* QualityOfService+Multithreading.swift */; };
 		65D6299D22B7982500568F8B /* GCDParallelizator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D6299C22B7982500568F8B /* GCDParallelizator.swift */; };
 		65D6299F22B7AEF300568F8B /* ParametersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D6299E22B7AEF300568F8B /* ParametersView.swift */; };
+		65E886E822B93B4C00309E41 /* Parameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E886E722B93B4C00309E41 /* Parameters.swift */; };
 		7FC4D0CE22B29BB200147D9B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FC4D0CD22B29BB200147D9B /* AppDelegate.swift */; };
 		7FC4D0D022B29BB200147D9B /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FC4D0CF22B29BB200147D9B /* RootViewController.swift */; };
 		7FC4D0D522B29BB300147D9B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7FC4D0D422B29BB300147D9B /* Assets.xcassets */; };
@@ -24,6 +25,7 @@
 		659132DF22B8DE7300248CA3 /* QualityOfService+Multithreading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QualityOfService+Multithreading.swift"; sourceTree = "<group>"; };
 		65D6299C22B7982500568F8B /* GCDParallelizator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCDParallelizator.swift; sourceTree = "<group>"; };
 		65D6299E22B7AEF300568F8B /* ParametersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParametersView.swift; sourceTree = "<group>"; };
+		65E886E722B93B4C00309E41 /* Parameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parameters.swift; sourceTree = "<group>"; };
 		7FC4D0CA22B29BB200147D9B /* Multithreading.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Multithreading.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FC4D0CD22B29BB200147D9B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7FC4D0CF22B29BB200147D9B /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
@@ -88,6 +90,7 @@
 		7FC4D0E122B3941500147D9B /* Parallelization */ = {
 			isa = PBXGroup;
 			children = (
+				65E886E722B93B4C00309E41 /* Parameters.swift */,
 				7FC4D0E222B3988B00147D9B /* Parallelizator.swift */,
 				7FC4D0DF22B29E3900147D9B /* PThreadParallelizator.swift */,
 				7FC4D0E522B3BF4800147D9B /* NSThreadParallelizator.swift */,
@@ -181,6 +184,7 @@
 				7FC4D0E322B3988B00147D9B /* Parallelizator.swift in Sources */,
 				7FC4D0CE22B29BB200147D9B /* AppDelegate.swift in Sources */,
 				7FC4D0E022B29E3900147D9B /* PThreadParallelizator.swift in Sources */,
+				65E886E822B93B4C00309E41 /* Parameters.swift in Sources */,
 				7FC4D0E622B3BF4800147D9B /* NSThreadParallelizator.swift in Sources */,
 				659132E022B8DE7300248CA3 /* QualityOfService+Multithreading.swift in Sources */,
 				65D6299F22B7AEF300568F8B /* ParametersView.swift in Sources */,

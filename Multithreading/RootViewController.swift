@@ -10,22 +10,22 @@ import UIKit
 
 
 final class RootViewController: UIViewController, ParameterViewDelegate {
-	fileprivate enum Constants: CGFloat {
+	private enum Constants: CGFloat {
 		case spacing = 30
 		case rowHeight = 60
 		case graphHeight = 120
 	}
 
-	fileprivate typealias Action = () -> Void
-	fileprivate struct ListAction {
+	private typealias Action = () -> Void
+	private struct ListAction {
 		let button: UIButton!
 		let parallelizator: Parallelizator!
 	}
-	fileprivate var actionsList: [ListAction]
+	private var actionsList: [ListAction]
 	
-	fileprivate var controlFlow: ControlFlow!
-	fileprivate var detachState: DetachState!
-	fileprivate var qualityOfService: QualityOfService!
+	private var controlFlow: ControlFlow!
+	private var detachState: DetachState!
+	private var qualityOfService: QualityOfService!
 	
 
 	// MARK: - Life cycle
@@ -38,7 +38,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 		actionsList = []
 		controlFlow = .sync
 		detachState = .detached
-		qualityOfService = .default
+		qualityOfService = .background
 		super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
 		navigationItem.title = "Ways of parallelism"
 	}
@@ -80,13 +80,13 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 	
 	// MARK: - Creating UI
 
-	fileprivate func createMainView() -> UIView {
+	private func createMainView() -> UIView {
 		let view = UIView()
 		view.backgroundColor = .white
 		return view
 	}
 
-	fileprivate func createStackView(arrangedSubviews: [UIView]) -> UIStackView {
+	private func createStackView(arrangedSubviews: [UIView]) -> UIStackView {
 		let stackView = UIStackView(arrangedSubviews: arrangedSubviews)
 		stackView.axis = .vertical
 		stackView.distribution = .fillProportionally
@@ -96,7 +96,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 		return stackView
 	}
 	
-	fileprivate func createParametersView() -> ParametersView {
+	private func createParametersView() -> ParametersView {
 		let initialValues: [ParameterDetails] = [controlFlow, detachState, qualityOfService]
 		let view = ParametersView(initialValues: initialValues)
 		view.delegate = self
@@ -107,7 +107,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 		return view
 	}
 	
-	fileprivate func createListAction(parallelizator: Parallelizator!) -> UIView {
+	private func createListAction(parallelizator: Parallelizator!) -> UIView {
 		let button = UIButton()
 		button.setTitle(parallelizator.name, for: .normal)
 		button.backgroundColor = .gray
@@ -123,7 +123,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 		return button
 	}
 	
-	fileprivate func createFlexibleSpace() -> UIView {
+	private func createFlexibleSpace() -> UIView {
 		let space = UIView()
 		space.translatesAutoresizingMaskIntoConstraints = false
 		NSLayoutConstraint.activate([
@@ -132,7 +132,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 		return space
 	}
 	
-	fileprivate func createAnimatedGraphView() -> AnimatedGraphView {
+	private func createAnimatedGraphView() -> AnimatedGraphView {
 		let view = AnimatedGraphView()
 		view.backgroundColor = .lightGray
 		view.graphColor = .black
@@ -146,7 +146,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 
 	// MARK: - Action handling
 	
-	@objc fileprivate func buttonActionHandler(sender: UIButton!) {
+	@objc private func buttonActionHandler(sender: UIButton!) {
 		for action in actionsList {
 			guard action.button == sender else {
 				continue
@@ -177,7 +177,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 		}
 	}
 	
-	fileprivate func performTask(name: String, parameters: [ParameterDetails]) {
+	private func performTask(name: String, parameters: [ParameterDetails]) {
 		let uid = UUID().uuidString.suffix(5).lowercased()
 		let parametersValueNames = parameters.map { $0.valueName! }
 		print("🚀 \(name)[\(uid)] \(parametersValueNames)")

@@ -36,19 +36,19 @@ final class GCDParallelizator: Parallelizator {
 	func performSync(action: @escaping Parallelizator.Action) throws {
 		let qosClass = try dispatchQosClass()
 		let workItem = createWorkItem(dispatchQoSClass: qosClass, action: action)
-		DispatchQueue.global(qos: qosClass).sync(execute: workItem)
+		DispatchQueue.global().sync(execute: workItem)
 	}
 	
 	func performAsync(action: @escaping Parallelizator.Action) throws {
 		let qosClass = try dispatchQosClass()
 		let workItem = createWorkItem(dispatchQoSClass: qosClass, action: action)
-		DispatchQueue.global(qos: qosClass).async(execute: workItem)
+		DispatchQueue.global().async(execute: workItem)
 	}
 	
 	
 	// MARK: - Routine
 	
-	fileprivate func dispatchQosClass() throws -> DispatchQoS.QoSClass {
+	private func dispatchQosClass() throws -> DispatchQoS.QoSClass {
 		let dispatchQosClassRaw = DispatchQoS.QoSClass(rawValue: qosClass)
 		guard let dispatchQosClass = dispatchQosClassRaw else {
 			throw GCDParallelizatorError.qualityOfService
@@ -56,9 +56,9 @@ final class GCDParallelizator: Parallelizator {
 		return dispatchQosClass
 	}
 	
-	fileprivate func createWorkItem(dispatchQoSClass: DispatchQoS.QoSClass, action: @escaping Parallelizator.Action) -> DispatchWorkItem {
+	private func createWorkItem(dispatchQoSClass: DispatchQoS.QoSClass, action: @escaping Parallelizator.Action) -> DispatchWorkItem {
 		let dispatchQoS = DispatchQoS(qosClass: dispatchQoSClass, relativePriority: 0)
-		let dispatchFlags: DispatchWorkItemFlags = detached ? [.detached, .enforceQoS] : []
+		let dispatchFlags: DispatchWorkItemFlags = detached ? [.detached, .enforceQoS] : [.enforceQoS]
 		let workItem = DispatchWorkItem(qos: dispatchQoS, flags: dispatchFlags, block: action)
 		return workItem
 	}

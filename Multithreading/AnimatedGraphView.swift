@@ -11,13 +11,13 @@ import UIKit
 
 
 final class AnimatedGraphView: UIView {	
-	fileprivate enum Constants: CGFloat {
+	private enum Constants: CGFloat {
 		case maxVelociy = 2
 		case pointSize = 10
         case pointFloatingZone = 0.5
 	}
-	fileprivate let numberOfPoints: Int = 5
-	fileprivate class ShapePoint {
+	private let numberOfPoints: Int = 5
+	private class ShapePoint {
 		lazy var point: CGPoint! = {
 			return CGPoint(x: 0.5, y: 0.5)
 		} ()
@@ -26,10 +26,10 @@ final class AnimatedGraphView: UIView {
 		} ()
 	}
 	
-	fileprivate var shapeLayer: CAShapeLayer!
-	fileprivate var pointLayersList: [CALayer]!
-	fileprivate var shapePointsList: [ShapePoint]!
-	fileprivate var displayLink: CADisplayLink?
+	private var shapeLayer: CAShapeLayer!
+	private var pointLayersList: [CALayer]!
+	private var shapePointsList: [ShapePoint]!
+	private var displayLink: CADisplayLink?
 	
 	static let defaultGraphColor: UIColor = .black
 	var graphColor: UIColor! {
@@ -80,7 +80,7 @@ final class AnimatedGraphView: UIView {
 	
 	// MARK: - Creating UI
 	
-	fileprivate static func createShapeLayer(frame: CGRect) -> CAShapeLayer {
+	private static func createShapeLayer(frame: CGRect) -> CAShapeLayer {
 		let layer = CAShapeLayer()
 		layer.frame = CGRect(origin: .zero, size: frame.size)
 		layer.fillColor = nil
@@ -89,7 +89,7 @@ final class AnimatedGraphView: UIView {
 		return layer
 	}
 	
-	fileprivate static func createPointLayersList(count: Int) -> [CALayer] {
+	private static func createPointLayersList(count: Int) -> [CALayer] {
 		let layerSize = CGSize(width: Constants.pointSize.rawValue, height: Constants.pointSize.rawValue)
 		var layersList = [CALayer]()
 		for _ in 0...count - 1 {
@@ -105,7 +105,7 @@ final class AnimatedGraphView: UIView {
 	
 	// MARK: - Display link
 	
-	fileprivate func setUpDisplayLink() {
+	private func setUpDisplayLink() {
 		guard displayLink == nil else {
 			return
 		}
@@ -113,7 +113,7 @@ final class AnimatedGraphView: UIView {
 		displayLink?.add(to: .current, forMode: .default)
 	}
 	
-	fileprivate func invalidateDispayLink() {
+	private func invalidateDispayLink() {
 		guard let displayLink = displayLink else {
 			return
 		}
@@ -121,7 +121,7 @@ final class AnimatedGraphView: UIView {
 		self.displayLink = nil
 	}
 	
-	@objc fileprivate func displayLinkFrame(sender: CADisplayLink) {
+	@objc private func displayLinkFrame(sender: CADisplayLink) {
 		evaluateNextFrame()
 		let coordinatesList = evaluatePointCoordinatesList()
 		CATransaction.begin()
@@ -134,7 +134,7 @@ final class AnimatedGraphView: UIView {
 	
 	// MARK: - Points
 	
-	fileprivate static func createShapePointsList(count: Int) -> [ShapePoint] {
+	private static func createShapePointsList(count: Int) -> [ShapePoint] {
 		var shapePointsList = [ShapePoint]()
 		for _ in 0...count - 1 {
 			let shapePoint = ShapePoint()
@@ -143,7 +143,7 @@ final class AnimatedGraphView: UIView {
 		return shapePointsList
 	}
 	
-	fileprivate func evaluateNextFrame() {
+	private func evaluateNextFrame() {
 		guard let displayLink = displayLink else {
 			return
 		}
@@ -170,7 +170,7 @@ final class AnimatedGraphView: UIView {
 		}
 	}
 	
-	fileprivate func evaluatePointCoordinatesList() -> [CGPoint] {
+	private func evaluatePointCoordinatesList() -> [CGPoint] {
 		var coordinatesList = [CGPoint]()
 		for i in 0...shapePointsList.count - 1 {
 			let coordinate = evaluatePointCoordinate(pointIndex: i)
@@ -179,7 +179,7 @@ final class AnimatedGraphView: UIView {
 		return coordinatesList
 	}
 	
-	fileprivate func evaluatePointCoordinate(pointIndex: Int) -> CGPoint {
+	private func evaluatePointCoordinate(pointIndex: Int) -> CGPoint {
 		let pointZoneWidth = bounds.width / CGFloat(numberOfPoints)
 		let pointZoneX = pointZoneWidth * CGFloat(pointIndex)
 		
@@ -194,7 +194,7 @@ final class AnimatedGraphView: UIView {
 		return pointCoordinate
 	}
 	
-	fileprivate func createShapePath(coordinatesList: [CGPoint]) -> CGPath {
+	private func createShapePath(coordinatesList: [CGPoint]) -> CGPath {
 		let path = CGMutablePath()
 		path.move(to: CGPoint(x: bounds.minX, y: bounds.midY))
 		coordinatesList.forEach { coordinate in
@@ -204,7 +204,7 @@ final class AnimatedGraphView: UIView {
 		return path.copy()!
 	}
 	
-	fileprivate func updatePointLayersFrames(coordinatesList: [CGPoint]) {
+	private func updatePointLayersFrames(coordinatesList: [CGPoint]) {
 		for (index, coordinate) in coordinatesList.enumerated() {
 			pointLayersList[index].position = coordinate
 		}
