@@ -29,12 +29,12 @@ final class PThreadParallelizator: Parallelizator {
 	
 	// MARK: - Protocol conformance <Parallelizator>
 
-	var name: String! {
+	var name: String {
 		return "pthread"
 	}
 	
-	var qosClass: qos_class_t!
-	var detached: Bool!
+	var qosClass: qos_class_t
+	var detached: Bool
 
 	func performSync(action: @escaping Parallelizator.Action) throws {
 		let pThread = try createPThread(action: action)

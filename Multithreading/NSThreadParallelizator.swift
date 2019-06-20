@@ -21,12 +21,12 @@ final class NSThreadParallelizator: Parallelizator {
 	
 	// MARK: - Protocol conformance <Parallelizator>
 	
-	var name: String! {
+	var name: String {
 		return "NSThread"
 	}
 	
-	var qosClass: qos_class_t!
-	var detached: Bool!
+	var qosClass: qos_class_t
+	var detached: Bool
 
 	func performSync(action: @escaping Parallelizator.Action) throws {
 		let thread = createNSThread(action: action)

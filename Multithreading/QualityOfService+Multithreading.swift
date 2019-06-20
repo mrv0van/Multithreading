@@ -13,7 +13,7 @@ let DefaultQosClass: qos_class_t = QOS_CLASS_BACKGROUND
 
 
 extension QualityOfService {
-	var qosClass: qos_class_t! {
+	var qosClass: qos_class_t {
 		get {
 			switch self {
 			case .userInteractive: return QOS_CLASS_USER_INTERACTIVE
@@ -28,7 +28,7 @@ extension QualityOfService {
 
 
 extension qos_class_t {
-	var qualityOfService: QualityOfService! {
+	var qualityOfService: QualityOfService {
 		get {
 			switch self {
 			case QOS_CLASS_USER_INTERACTIVE: return .userInteractive

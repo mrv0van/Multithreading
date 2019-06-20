@@ -12,10 +12,10 @@ import Foundation
 protocol Parallelizator: AnyObject {	
 	typealias Action = () -> Void
 	
-	var name: String! { get }
+	var name: String { get }
 	
-	var qosClass: qos_class_t! { get set }
-	var detached: Bool! { get set }
+	var qosClass: qos_class_t { get set }
+	var detached: Bool { get set }
 	
 	func performSync(action: @escaping Action) throws
 	

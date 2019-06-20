@@ -18,21 +18,21 @@ final class AnimatedGraphView: UIView {
 	}
 	private let numberOfPoints: Int = 5
 	private class ShapePoint {
-		lazy var point: CGPoint! = {
+		lazy var point: CGPoint = {
 			return CGPoint(x: 0.5, y: 0.5)
 		} ()
-		lazy var velocity: CGPoint! = {
+		lazy var velocity: CGPoint = {
 			return .zero
 		} ()
 	}
 	
-	private var shapeLayer: CAShapeLayer!
-	private var pointLayersList: [CALayer]!
-	private var shapePointsList: [ShapePoint]!
+	private var shapeLayer: CAShapeLayer
+	private var pointLayersList: [CALayer]
+	private var shapePointsList: [ShapePoint]
 	private var displayLink: CADisplayLink?
 	
 	static let defaultGraphColor: UIColor = .black
-	var graphColor: UIColor! {
+	var graphColor: UIColor {
 		didSet {
 			shapeLayer.strokeColor = graphColor.cgColor
 			pointLayersList.forEach { layer in

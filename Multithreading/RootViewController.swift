@@ -18,14 +18,14 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 
 	private typealias Action = () -> Void
 	private struct ListAction {
-		let button: UIButton!
-		let parallelizator: Parallelizator!
+		let button: UIButton
+		let parallelizator: Parallelizator
 	}
 	private var actionsList: [ListAction]
 	
-	private var controlFlow: ControlFlow!
-	private var detachState: DetachState!
-	private var qualityOfService: QualityOfService!
+	private var controlFlow: ControlFlow
+	private var detachState: DetachState
+	private var qualityOfService: QualityOfService
 	
 
 	// MARK: - Life cycle
@@ -107,7 +107,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 		return view
 	}
 	
-	private func createListAction(parallelizator: Parallelizator!) -> UIView {
+	private func createListAction(parallelizator: Parallelizator) -> UIView {
 		let button = UIButton()
 		button.setTitle(parallelizator.name, for: .normal)
 		button.backgroundColor = .gray
@@ -146,28 +146,24 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 
 	// MARK: - Action handling
 	
-	@objc private func buttonActionHandler(sender: UIButton!) {
+	@objc private func buttonActionHandler(sender: UIButton) {
 		for action in actionsList {
 			guard action.button == sender else {
 				continue
 			}
 			do {
-				guard let parallelizator = action.parallelizator else {
-					return
-				}
-				
-				let name = parallelizator.name
+				let name = action.parallelizator.name
 				let parameters: [ParameterDetails] = [controlFlow, detachState, qualityOfService]
 				let actionBlock: () -> Void = { [weak self] in
-					self?.performTask(name: name!, parameters: parameters)
+					self?.performTask(name: name, parameters: parameters)
 				}
 
-				parallelizator.qosClass = qualityOfService.qosClass
-				parallelizator.detached = detachState == .detached
+				action.parallelizator.qosClass = qualityOfService.qosClass
+				action.parallelizator.detached = detachState == .detached
 				if controlFlow == .sync {
-					try parallelizator.performSync(action: actionBlock)
+					try action.parallelizator.performSync(action: actionBlock)
 				} else {
-					try parallelizator.performAsync(action: actionBlock)
+					try action.parallelizator.performAsync(action: actionBlock)
 				}
 			}
 			catch {
@@ -179,7 +175,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 	
 	private func performTask(name: String, parameters: [ParameterDetails]) {
 		let uid = UUID().uuidString.suffix(5).lowercased()
-		let parametersValueNames = parameters.map { $0.valueName! }
+		let parametersValueNames = parameters.map { $0.valueName }
 		print("🚀 \(name)[\(uid)] \(parametersValueNames)")
 
 		let beginTime = CACurrentMediaTime()
@@ -197,7 +193,7 @@ final class RootViewController: UIViewController, ParameterViewDelegate {
 	
 	// MARK: - Protocol conformance <ParametersViewDelegate>
 	
-	func parametersView(_: ParametersView!, didChangeParameter parameter: ParameterDetails!) {
+	func parametersView(_: ParametersView, didChangeParameter parameter: ParameterDetails) {
 		switch parameter {
 		case let controlFlow as ControlFlow: self.controlFlow = controlFlow
 		case let detachState as DetachState: self.detachState = detachState

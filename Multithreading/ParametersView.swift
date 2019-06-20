@@ -10,7 +10,7 @@ import UIKit
 
 
 protocol ParameterViewDelegate {
-	func parametersView(_: ParametersView!, didChangeParameter: ParameterDetails!)
+	func parametersView(_: ParametersView, didChangeParameter: ParameterDetails)
 }
 
 
@@ -90,7 +90,7 @@ final class ParametersView: UIView {
 		}
 		let parameterNext = parameter.next
 		parameters[sender.tag] = parameterNext
-		sender.setTitle(parameterNext?.valueName, for: .normal)
+		sender.setTitle(parameterNext.valueName, for: .normal)
 		
 		delegate?.parametersView(self, didChangeParameter: parameterNext)
 	}
